@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    canvas {
+      border: 1px solid black;
+      display: block;
+      margin: auto auto;
+      background-color: black;
+    }
+    input {
+      display: inline-block;
+      margin: auto auto;
+    }
+    .inputdiv {
+      display: block;
+      text-align: center;
+      margin: auto auto;
+    }
+  </style>
+</head>
+<body>
+<div class="inputdiv">
+  <h1>Burning Ship Fractal</h1>
+  X-Axis: <input type="range" id="xAxisRange" min="-2" max="2" step="0.01" value="-1.75" oninput="drawBurningShip()">
+  Y-Axis: <input type="range" id="yAxisRange" min="-2" max="2" step="0.01" value="0" oninput="drawBurningShip()">
+  Zoom: <input type="range" id="zoomRange" min="0" max="5" step="0.01" value="1" oninput="drawBurningShip()">
+</div>
+<br>
+<canvas id="fractalCanvas" width="800" height="800"></canvas>
+<script>
+  const canvas = document.getElementById('fractalCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const maxIterations = 1000;
+  const bailout = 2;
+
+  let centerX = -1.75;
+  let centerY = 0;
+  let zoom = 1;
+
+  function drawBurningShip() {
+    const xRange = parseFloat(document.getElementById('xAxisRange').value);
+    const yRange = parseFloat(document.getElementById('yAxisRange').value);
+    zoom = parseFloat(document.getElementById('zoomRange').value);
+
+    centerX = xRange;
+    centerY = yRange;
+
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    const data = imageData.data;
+
+    const start = performance.now();
+
+    let index = 0;
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const real = (x - canvas.width / 2) / (0.5 * zoom * canvas.width) + centerX;
+        const imag = (y - canvas.height / 2) / (0.5 * zoom * canvas.height) + centerY;
+
+        let xn = 0;
+        let yn = 0;
+        let i = 0;
+
+        while (xn * xn + yn * yn < bailout * bailout && i < maxIterations) {
+          const xTemp = xn * xn - yn * yn + real;
+          yn = Math.abs(2 * xn * yn) + imag;
+          xn = Math.abs(xTemp);
+          i++;
+        }
+
+        const hue = (i === maxIterations) ? 0 : i / maxIterations;
+        const rgb = hslToRgb(hue, 1, 0.5);
+
+        index = (x + y * canvas.width) * 4;
+        data[index] = rgb[0];
+        data[index + 1] = rgb[1];
+        data[index + 2] = rgb[2];
+        data[index + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    const elapsed = performance.now() - start;
+    console.log('Rendering time:', elapsed.toFixed(2), 'ms');
+  }
+
+  function hslToRgb(h, s, l) {
+    let r, g, b;
+
+    if (s === 0) {
+      r = g = b = l; // achromatic
+    } else {
+      function hue2rgb(p, q, t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      }
+
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+
+  drawBurningShip();
+</script>
+</body>
+</html>

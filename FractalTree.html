@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    canvas {
+      border: 1px solid black;
+      display: block;
+      margin: auto auto;
+    }
+    input{
+        display: inline-block;
+        margin: auto auto;
+    }
+    .inputdiv{
+        display: block;
+        text-align: center;
+        margin: auto auto;
+    }
+  </style>
+</head>
+<body>
+<div class="inputdiv">
+  <h1>Fractal Tree</h1>
+  Length: <input type="range" id="lengthRange" min="10" max="1000" value="100" oninput="drawFractalTree()">
+  Angle: <input type="range" id="angleRange" min="-180" max="180" value="0" oninput="drawFractalTree()">
+</div>
+  <br>
+  <canvas id="fractalCanvas" width="1000" height="800"></canvas>
+  <script>
+    const canvas = document.getElementById('fractalCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawFractalTree() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const length = parseInt(document.getElementById('lengthRange').value);
+      const angle = parseInt(document.getElementById('angleRange').value) * Math.PI / 180;
+
+      drawBranch(canvas.width / 2, canvas.height, length, -Math.PI / 2, 10, angle);
+    }
+
+    function drawBranch(x, y, length, angle, thickness, branchAngle) {
+      if (length < 2) {
+        return;
+      }
+
+      const endX = x + length * Math.cos(angle);
+      const endY = y + length * Math.sin(angle);
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(endX, endY);
+      ctx.lineWidth = thickness;
+      ctx.stroke();
+
+      const leftAngle = angle + branchAngle;
+      const rightAngle = angle - branchAngle;
+
+      drawBranch(endX, endY, length * 0.7, leftAngle, thickness * 0.7, branchAngle);
+      drawBranch(endX, endY, length * 0.7, rightAngle, thickness * 0.7, branchAngle);
+    }
+
+    drawFractalTree();
+  </script>
+</body>
+</html>

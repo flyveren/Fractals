@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f1f1f1;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      font-family: Arial, sans-serif;
+      margin-bottom: 10px;
+    }
+
+    input[type="range"] {
+      width: 300px;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sierpinski Triangle</h1>
+    <input type="range" id="depthRange" min="0" max="8" value="4">
+    <canvas id="fractalCanvas" width="1000" height="800"></canvas>
+  </div>
+  <script>
+    const canvas = document.getElementById('fractalCanvas');
+    const ctx = canvas.getContext('2d');
+    const depthRange = document.getElementById('depthRange');
+
+    depthRange.addEventListener('input', drawSierpinskiTriangle);
+
+    function drawSierpinskiTriangle() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const depth = parseInt(depthRange.value);
+
+      const sideLength = Math.min(canvas.width, canvas.height) - 20;
+      const startX = canvas.width / 2 - sideLength / 2;
+      const startY = canvas.height - (sideLength * Math.sqrt(3)) / 15;
+
+      drawTriangle(startX, startY, sideLength, depth);
+    }
+
+    function drawTriangle(x, y, sideLength, depth) {
+      const height = (sideLength * Math.sqrt(3)) / 2;
+
+      if (depth === 0) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + sideLength, y);
+        ctx.lineTo(x + sideLength / 2, y - height);
+        ctx.closePath();
+        ctx.fillStyle = 'black';
+        ctx.fill();
+      } else {
+        const newSideLength = sideLength / 2;
+        const newHeight = height / 2;
+
+        drawTriangle(x, y, newSideLength, depth - 1);
+        drawTriangle(x + newSideLength, y, newSideLength, depth - 1);
+        drawTriangle(x + newSideLength / 2, y - newHeight, newSideLength, depth - 1);
+      }
+    }
+
+    drawSierpinskiTriangle();
+  </script>
+</body>
+</html>
